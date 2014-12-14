@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *******************************************************************************/
-package org.springside.examples.service.account;
+package org.springside.examples.user.service;
 
 import java.util.List;
 
@@ -14,11 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springside.examples.entity.User;
-import org.springside.examples.repository.TaskDao;
-import org.springside.examples.repository.UserDao;
-import org.springside.examples.service.ServiceException;
-import org.springside.examples.service.account.ShiroDbRealm.ShiroUser;
+import org.springside.examples.exception.ServiceException;
+import org.springside.examples.user.dao.UserMapper;
+import org.springside.examples.user.model.User;
+import org.springside.examples.user.service.ShiroDbRealm.ShiroUser;
 import org.springside.modules.security.utils.Digests;
 import org.springside.modules.utils.Clock;
 import org.springside.modules.utils.Encodes;
@@ -39,20 +38,18 @@ public class AccountService {
 
 	private static Logger logger = LoggerFactory.getLogger(AccountService.class);
 
-	private UserDao userDao;
-	private TaskDao taskDao;
+	private UserMapper userMapper;
 	private Clock clock = Clock.DEFAULT;
 
-	public List<User> getAllUser() {
-		return (List<User>) userDao.findAll();
-	}
 
 	public User getUser(Long id) {
-		return userDao.findOne(id);
+		return userMapper.selectByPrimaryKey(id);
 	}
 
 	public User findUserByLoginName(String loginName) {
-		return userDao.findByLoginName(loginName);
+		User record=new User();
+		record.setLoginName(loginName);
+		return userMapper.selectBySelective(record);
 	}
 
 	public void registerUser(User user) {
@@ -60,14 +57,14 @@ public class AccountService {
 		user.setRoles("user");
 		user.setRegisterDate(clock.getCurrentDate());
 
-		userDao.save(user);
+		userMapper.insert(user);
 	}
 
 	public void updateUser(User user) {
-		if (StringUtils.isNotBlank(user.getPlainPassword())) {
+		if (StringUtils.isNotBlank(user.getName())) {
 			entryptPassword(user);
 		}
-		userDao.save(user);
+		userMapper.updateByPrimaryKey(user);
 	}
 
 	public void deleteUser(Long id) {
@@ -75,8 +72,7 @@ public class AccountService {
 			logger.warn("操作员{}尝试删除超级管理员用户", getCurrentUserName());
 			throw new ServiceException("不能删除超级管理员用户");
 		}
-		userDao.delete(id);
-		taskDao.deleteByUserId(id);
+		userMapper.deleteByPrimaryKey(id);
 
 	}
 
@@ -102,19 +98,15 @@ public class AccountService {
 		byte[] salt = Digests.generateSalt(SALT_SIZE);
 		user.setSalt(Encodes.encodeHex(salt));
 
-		byte[] hashPassword = Digests.sha1(user.getPlainPassword().getBytes(), salt, HASH_INTERATIONS);
+		byte[] hashPassword = Digests.sha1(user.getPassword().getBytes(), salt, HASH_INTERATIONS);
 		user.setPassword(Encodes.encodeHex(hashPassword));
 	}
 
 	@Autowired
-	public void setUserDao(UserDao userDao) {
-		this.userDao = userDao;
+	public void setuserMapper(UserMapper userMapper) {
+		this.userMapper = userMapper;
 	}
 
-	@Autowired
-	public void setTaskDao(TaskDao taskDao) {
-		this.taskDao = taskDao;
-	}
 
 	public void setClock(Clock clock) {
 		this.clock = clock;

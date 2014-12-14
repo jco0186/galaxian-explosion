@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *******************************************************************************/
-package org.springside.examples.web.account;
+package org.springside.examples.user.web;
 
 import javax.validation.Valid;
 
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springside.examples.entity.User;
-import org.springside.examples.service.account.AccountService;
+import org.springside.examples.user.model.User;
+import org.springside.examples.user.service.AccountService;
 
 /**
  * 用户注册的Controller.

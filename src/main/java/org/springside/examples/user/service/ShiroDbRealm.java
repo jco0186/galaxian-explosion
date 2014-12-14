@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *******************************************************************************/
-package org.springside.examples.service.account;
+package org.springside.examples.user.service;
 
 import java.io.Serializable;
 
@@ -20,9 +20,8 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
-import org.springside.examples.entity.User;
+import org.springside.examples.user.model.User;
 import org.springside.modules.utils.Encodes;
-
 import com.google.common.base.Objects;
 
 public class ShiroDbRealm extends AuthorizingRealm {

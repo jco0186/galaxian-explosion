@@ -3,46 +3,55 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *******************************************************************************/
-package org.springside.examples.web.account;
+package org.springside.examples.user.web;
+
+import java.util.List;
 
 import javax.validation.Valid;
 
-import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springside.examples.entity.User;
-import org.springside.examples.service.account.AccountService;
-import org.springside.examples.service.account.ShiroDbRealm.ShiroUser;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springside.examples.user.model.User;
+import org.springside.examples.user.service.AccountService;
 
 /**
- * 用户修改自己资料的Controller.
+ * 管理员管理用户的Controller.
  * 
  * @author calvin
  */
 @Controller
-@RequestMapping(value = "/profile")
-public class ProfileController {
+@RequestMapping(value = "/admin/user")
+public class UserAdminController {
 
 	@Autowired
 	private AccountService accountService;
 
-	@RequestMapping(method = RequestMethod.GET)
-	public String updateForm(Model model) {
-		Long id = getCurrentUserId();
+	@RequestMapping(value = "update/{id}", method = RequestMethod.GET)
+	public String updateForm(@PathVariable("id") Long id, Model model) {
 		model.addAttribute("user", accountService.getUser(id));
-		return "account/profile";
+		return "account/adminUserForm";
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
-	public String update(@Valid @ModelAttribute("user") User user) {
+	@RequestMapping(value = "update", method = RequestMethod.POST)
+	public String update(@Valid @ModelAttribute("user") User user, RedirectAttributes redirectAttributes) {
 		accountService.updateUser(user);
-		updateCurrentUserName(user.getName());
-		return "redirect:/";
+		redirectAttributes.addFlashAttribute("message", "更新用户" + user.getLoginName() + "成功");
+		return "redirect:/admin/user";
+	}
+
+	@RequestMapping(value = "delete/{id}")
+	public String delete(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+		User user = accountService.getUser(id);
+		accountService.deleteUser(id);
+		redirectAttributes.addFlashAttribute("message", "删除用户" + user.getLoginName() + "成功");
+		return "redirect:/admin/user";
 	}
 
 	/**
@@ -54,21 +63,5 @@ public class ProfileController {
 		if (id != -1) {
 			model.addAttribute("user", accountService.getUser(id));
 		}
-	}
-
-	/**
-	 * 取出Shiro中的当前用户Id.
-	 */
-	private Long getCurrentUserId() {
-		ShiroUser user = (ShiroUser) SecurityUtils.getSubject().getPrincipal();
-		return user.id;
-	}
-
-	/**
-	 * 更新Shiro中当前用户的用户名.
-	 */
-	private void updateCurrentUserName(String userName) {
-		ShiroUser user = (ShiroUser) SecurityUtils.getSubject().getPrincipal();
-		user.name = userName;
 	}
 }

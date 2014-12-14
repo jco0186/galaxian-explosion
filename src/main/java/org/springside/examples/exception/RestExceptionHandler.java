@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  *******************************************************************************/
-package org.springside.examples.rest;
+package org.springside.examples.exception;
 
 import java.util.Map;
 
