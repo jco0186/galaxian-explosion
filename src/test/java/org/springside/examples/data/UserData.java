@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.springside.examples.data;
 
-import org.springside.examples.entity.User;
+import org.springside.examples.user.model.User;
 import org.springside.modules.test.data.RandomData;
 
 public class UserData {
@@ -14,7 +14,7 @@ public class UserData {
 		User user = new User();
 		user.setLoginName(RandomData.randomName("user"));
 		user.setName(RandomData.randomName("User"));
-		user.setPlainPassword(RandomData.randomName("password"));
+		user.equals(RandomData.randomName("password"));
 
 		return user;
 	}

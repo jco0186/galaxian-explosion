@@ -16,12 +16,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springside.examples.data.UserData;
-import org.springside.examples.entity.User;
-import org.springside.examples.repository.TaskDao;
-import org.springside.examples.repository.UserDao;
-import org.springside.examples.service.ServiceException;
-import org.springside.examples.service.account.AccountService;
-import org.springside.examples.service.account.ShiroDbRealm.ShiroUser;
+import org.springside.examples.user.model.User;
+import org.springside.examples.exception.ServiceException;
+import org.springside.examples.user.dao.UserMapper;
+import org.springside.examples.user.service.AccountService;
+import org.springside.examples.user.service.ShiroDbRealm.ShiroUser;
 import org.springside.modules.test.security.shiro.ShiroTestUtils;
 import org.springside.modules.utils.Clock.MockClock;
 
@@ -36,10 +35,7 @@ public class AccountServiceTest {
 	private AccountService accountService;
 
 	@Mock
-	private UserDao mockUserDao;
-
-	@Mock
-	private TaskDao mockTaskDao;
+	private UserMapper userMapper;
 
 	@Before
 	public void setUp() {
@@ -71,7 +67,7 @@ public class AccountServiceTest {
 
 		// 如果明文密码为空，加密密码无变化。
 		User user2 = UserData.randomNewUser();
-		user2.setPlainPassword(null);
+		user2.setPassword(null);
 		accountService.updateUser(user2);
 		assertThat(user2.getSalt()).isNull();
 	}
@@ -80,7 +76,7 @@ public class AccountServiceTest {
 	public void deleteUser() {
 		// 正常删除用户.
 		accountService.deleteUser(2L);
-		Mockito.verify(mockUserDao).delete(2L);
+		Mockito.verify(userMapper).deleteByPrimaryKey(2L);
 
 		// 删除超级管理用户抛出异常, userDao没有被执行
 		try {
@@ -89,7 +85,7 @@ public class AccountServiceTest {
 		} catch (ServiceException e) {
 			// expected exception
 		}
-		Mockito.verify(mockUserDao, Mockito.never()).delete(1L);
+		Mockito.verify(userMapper, Mockito.never()).deleteByPrimaryKey(1L);
 	}
 
 }
